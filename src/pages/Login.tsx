@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Shield, Eye, EyeOff, Terminal, AlertCircle } from 'lucide-react';
+import { Shield, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { CyberButton } from '@/components/ui/cyber-button';
 import { CyberInput } from '@/components/ui/cyber-input';
@@ -37,83 +37,60 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 cyber-grid relative overflow-hidden">
-      {/* Animated background elements */}
+      {/* Subtle background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 8, repeat: Infinity }}
-        />
-        <motion.div
-          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl"
-          animate={{ scale: [1.2, 1, 1.2], opacity: [0.5, 0.3, 0.5] }}
-          transition={{ duration: 8, repeat: Infinity }}
-        />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl" />
       </div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="relative z-10 w-full max-w-md"
+        transition={{ duration: 0.5 }}
+        className="relative z-10 w-full max-w-sm"
       >
-        <CyberCard glow className="backdrop-blur-xl">
+        <CyberCard className="backdrop-blur-xl border-border/50">
           <CyberCardContent className="p-8">
             {/* Logo & Header */}
             <motion.div 
               className="text-center mb-8"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1 }}
             >
               <div className="flex justify-center mb-4">
-                <div className="relative">
-                  <Shield className="w-16 h-16 text-primary" />
-                  <motion.div
-                    className="absolute inset-0 bg-primary/20 rounded-full blur-xl"
-                    animate={{ scale: [1, 1.3, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
+                <div className="relative p-3 rounded-xl bg-primary/10 border border-primary/20">
+                  <Shield className="w-10 h-10 text-primary" />
                 </div>
               </div>
-              <h1 className="text-3xl font-bold font-mono tracking-wider text-foreground">
-                <span className="text-primary text-glow">AX</span>SEC
+              <h1 className="text-2xl font-bold font-mono tracking-wider text-foreground">
+                <span className="text-primary">AX</span>SEC
               </h1>
-              <p className="text-sm text-muted-foreground mt-2 font-mono">
-                [ OSINT INTELLIGENCE PLATFORM ]
+              <p className="text-xs text-muted-foreground mt-2 tracking-widest uppercase">
+                Intelligence Platform
               </p>
             </motion.div>
-
-            {/* Terminal-style header */}
-            <div className="flex items-center gap-2 mb-6 pb-4 border-b border-border/30">
-              <Terminal className="w-4 h-4 text-primary" />
-              <span className="text-xs font-mono text-muted-foreground">
-                SECURE AUTHENTICATION REQUIRED
-              </span>
-              <span className="ml-auto w-2 h-2 rounded-full status-online animate-pulse" />
-            </div>
 
             {/* Error Message */}
             {error && (
               <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
                 className="flex items-center gap-2 p-3 mb-4 rounded-md bg-destructive/10 border border-destructive/30 text-destructive text-sm"
               >
-                <AlertCircle className="w-4 h-4" />
-                <span className="font-mono">{error}</span>
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <span className="font-mono text-xs">{error}</span>
               </motion.div>
             )}
 
             {/* Login Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
                 <label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                  Username / Email
+                  Username
                 </label>
                 <CyberInput
                   type="text"
-                  placeholder="Enter credentials..."
+                  placeholder="Enter username..."
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
@@ -156,20 +133,17 @@ export default function Login() {
                       animate={{ rotate: 360 }}
                       transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                     />
-                    AUTHENTICATING...
+                    Authenticating...
                   </span>
                 ) : (
-                  'INITIALIZE ACCESS'
+                  'Sign In'
                 )}
               </CyberButton>
             </form>
 
             {/* Footer */}
             <div className="mt-6 pt-4 border-t border-border/30 text-center">
-              <p className="text-xs font-mono text-muted-foreground">
-                AUTHORIZED PERSONNEL ONLY
-              </p>
-              <p className="text-xs font-mono text-muted-foreground/50 mt-1">
+              <p className="text-xs font-mono text-muted-foreground/60">
                 Demo: admin / any password (4+ chars)
               </p>
             </div>

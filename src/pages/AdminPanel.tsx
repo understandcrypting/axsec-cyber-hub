@@ -2,15 +2,15 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, 
-  Plus, 
   Search, 
   MoreVertical, 
-  Edit, 
   Trash2, 
   Power,
   UserPlus,
-  X,
-  Check
+  Check,
+  Edit2,
+  CreditCard,
+  RefreshCw
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserManagement } from '@/contexts/UserManagementContext';
@@ -19,7 +19,7 @@ import { CyberInput } from '@/components/ui/cyber-input';
 import { CyberButton } from '@/components/ui/cyber-button';
 import { CyberBadge } from '@/components/ui/cyber-badge';
 import { tierBadgeStyles } from '@/data/mockData';
-import { SubscriptionTier } from '@/types';
+import { SubscriptionTier, SUBSCRIPTION_LIMITS } from '@/types';
 import { cn } from '@/lib/utils';
 import { Navigate } from 'react-router-dom';
 import {
@@ -28,6 +28,9 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu';
 import {
   Dialog,
@@ -47,14 +50,16 @@ import { toast } from 'sonner';
 
 export default function AdminPanel() {
   const { user } = useAuth();
-  const { users, addUser, deleteUser, toggleUserStatus } = useUserManagement();
+  const { users, addUser, deleteUser, toggleUserStatus, updateUserSubscription, resetUserCredits } = useUserManagement();
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<string | null>(null);
   const [newUser, setNewUser] = useState({
     username: '',
     email: '',
+    password: '',
     role: 'user' as 'admin' | 'user',
-    subscription: 'basic' as SubscriptionTier,
+    subscription: 'pro' as SubscriptionTier,
   });
 
   // Redirect non-admins
@@ -68,22 +73,25 @@ export default function AdminPanel() {
   );
 
   const handleAddUser = () => {
-    if (!newUser.username || !newUser.email) {
+    if (!newUser.username || !newUser.email || !newUser.password) {
       toast.error('Please fill in all required fields');
       return;
     }
 
+    const limits = SUBSCRIPTION_LIMITS[newUser.subscription];
     addUser({
       username: newUser.username,
       email: newUser.email,
       role: newUser.role,
       subscription: newUser.subscription,
       isActive: true,
+      dailyCreditsUsed: 0,
+      dailyCreditsLimit: limits.dailyCredits,
     });
 
     toast.success('User created successfully');
     setIsAddModalOpen(false);
-    setNewUser({ username: '', email: '', role: 'user', subscription: 'basic' });
+    setNewUser({ username: '', email: '', password: '', role: 'user', subscription: 'pro' });
   };
 
   const handleDeleteUser = (userId: string, username: string) => {
@@ -104,6 +112,16 @@ export default function AdminPanel() {
     toast.success(`User ${currentStatus ? 'deactivated' : 'activated'}`);
   };
 
+  const handleChangeSubscription = (userId: string, newTier: SubscriptionTier) => {
+    updateUserSubscription(userId, newTier);
+    toast.success(`Subscription updated to ${newTier}`);
+  };
+
+  const handleResetCredits = (userId: string) => {
+    resetUserCredits(userId);
+    toast.success('Daily credits reset');
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -113,11 +131,11 @@ export default function AdminPanel() {
         className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
       >
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold font-mono tracking-wide">
-            <span className="text-primary text-glow">Admin</span> Panel
+          <h1 className="text-2xl font-bold font-mono tracking-wide">
+            <span className="text-primary">Admin</span> Panel
           </h1>
-          <p className="text-sm text-muted-foreground font-mono mt-1">
-            Manage users, permissions, and system settings
+          <p className="text-sm text-muted-foreground mt-1">
+            Manage users, subscriptions, and credits
           </p>
         </div>
         <CyberButton onClick={() => setIsAddModalOpen(true)}>
@@ -134,27 +152,27 @@ export default function AdminPanel() {
         className="grid grid-cols-2 lg:grid-cols-4 gap-4"
       >
         <CyberCard>
-          <CyberCardContent className="p-4 text-center">
+          <CyberCardContent className="p-4">
             <p className="text-2xl font-bold font-mono text-foreground">{users.length}</p>
-            <p className="text-xs text-muted-foreground font-mono uppercase">Total Users</p>
+            <p className="text-xs text-muted-foreground uppercase">Total Users</p>
           </CyberCardContent>
         </CyberCard>
         <CyberCard>
-          <CyberCardContent className="p-4 text-center">
+          <CyberCardContent className="p-4">
             <p className="text-2xl font-bold font-mono text-success">{users.filter(u => u.isActive).length}</p>
-            <p className="text-xs text-muted-foreground font-mono uppercase">Active</p>
+            <p className="text-xs text-muted-foreground uppercase">Active</p>
           </CyberCardContent>
         </CyberCard>
         <CyberCard>
-          <CyberCardContent className="p-4 text-center">
-            <p className="text-2xl font-bold font-mono text-warning">{users.filter(u => u.role === 'admin').length}</p>
-            <p className="text-xs text-muted-foreground font-mono uppercase">Admins</p>
+          <CyberCardContent className="p-4">
+            <p className="text-2xl font-bold font-mono text-primary">{users.filter(u => u.subscription === 'pro').length}</p>
+            <p className="text-xs text-muted-foreground uppercase">Pro</p>
           </CyberCardContent>
         </CyberCard>
         <CyberCard>
-          <CyberCardContent className="p-4 text-center">
-            <p className="text-2xl font-bold font-mono text-primary">{users.filter(u => u.subscription === 'enterprise').length}</p>
-            <p className="text-xs text-muted-foreground font-mono uppercase">Enterprise</p>
+          <CyberCardContent className="p-4">
+            <p className="text-2xl font-bold font-mono text-yellow-400">{users.filter(u => u.subscription === 'enterprise').length}</p>
+            <p className="text-xs text-muted-foreground uppercase">Enterprise</p>
           </CyberCardContent>
         </CyberCard>
       </motion.div>
@@ -166,11 +184,11 @@ export default function AdminPanel() {
         transition={{ delay: 0.2 }}
       >
         <CyberInput
-          placeholder="Search users by name or email..."
+          placeholder="Search users..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           icon={<Search className="w-4 h-4" />}
-          className="max-w-md"
+          className="max-w-sm"
         />
       </motion.div>
 
@@ -192,13 +210,13 @@ export default function AdminPanel() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border/50">
-                    <th className="text-left py-3 px-4 text-xs font-mono text-muted-foreground uppercase tracking-wider">Status</th>
-                    <th className="text-left py-3 px-4 text-xs font-mono text-muted-foreground uppercase tracking-wider">User</th>
-                    <th className="text-left py-3 px-4 text-xs font-mono text-muted-foreground uppercase tracking-wider">Role</th>
-                    <th className="text-left py-3 px-4 text-xs font-mono text-muted-foreground uppercase tracking-wider">Subscription</th>
-                    <th className="text-left py-3 px-4 text-xs font-mono text-muted-foreground uppercase tracking-wider">Created</th>
-                    <th className="text-left py-3 px-4 text-xs font-mono text-muted-foreground uppercase tracking-wider">Last Login</th>
-                    <th className="text-right py-3 px-4 text-xs font-mono text-muted-foreground uppercase tracking-wider">Actions</th>
+                    <th className="text-left py-3 px-4 text-xs font-mono text-muted-foreground uppercase">Status</th>
+                    <th className="text-left py-3 px-4 text-xs font-mono text-muted-foreground uppercase">User</th>
+                    <th className="text-left py-3 px-4 text-xs font-mono text-muted-foreground uppercase">Role</th>
+                    <th className="text-left py-3 px-4 text-xs font-mono text-muted-foreground uppercase">Plan</th>
+                    <th className="text-left py-3 px-4 text-xs font-mono text-muted-foreground uppercase">Credits</th>
+                    <th className="text-left py-3 px-4 text-xs font-mono text-muted-foreground uppercase">Last Login</th>
+                    <th className="text-right py-3 px-4 text-xs font-mono text-muted-foreground uppercase">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -207,7 +225,7 @@ export default function AdminPanel() {
                       <td className="py-3 px-4">
                         <div className={cn(
                           "w-2 h-2 rounded-full",
-                          u.isActive ? "status-online" : "status-offline"
+                          u.isActive ? "bg-success" : "bg-muted-foreground"
                         )} />
                       </td>
                       <td className="py-3 px-4">
@@ -226,8 +244,18 @@ export default function AdminPanel() {
                           {u.subscription}
                         </CyberBadge>
                       </td>
-                      <td className="py-3 px-4 text-sm text-muted-foreground font-mono">
-                        {u.createdAt}
+                      <td className="py-3 px-4">
+                        <div className="font-mono text-sm">
+                          {u.dailyCreditsLimit === -1 ? (
+                            <span className="text-yellow-400">Unlimited</span>
+                          ) : (
+                            <span className={cn(
+                              u.dailyCreditsUsed >= u.dailyCreditsLimit ? 'text-destructive' : 'text-foreground'
+                            )}>
+                              {u.dailyCreditsUsed} / {u.dailyCreditsLimit}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="py-3 px-4 text-sm text-muted-foreground font-mono">
                         {u.lastLogin === 'Never' ? 'Never' : new Date(u.lastLogin).toLocaleDateString()}
@@ -239,7 +267,7 @@ export default function AdminPanel() {
                               <MoreVertical className="w-4 h-4" />
                             </CyberButton>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-popover border-border">
+                          <DropdownMenuContent align="end" className="bg-popover border-border w-48">
                             <DropdownMenuItem 
                               onClick={() => handleToggleStatus(u.id, u.isActive)}
                               className="gap-2"
@@ -247,6 +275,44 @@ export default function AdminPanel() {
                               <Power className="w-4 h-4" />
                               {u.isActive ? 'Deactivate' : 'Activate'}
                             </DropdownMenuItem>
+                            
+                            <DropdownMenuSub>
+                              <DropdownMenuSubTrigger className="gap-2">
+                                <CreditCard className="w-4 h-4" />
+                                Change Plan
+                              </DropdownMenuSubTrigger>
+                              <DropdownMenuSubContent className="bg-popover border-border">
+                                <DropdownMenuItem 
+                                  onClick={() => handleChangeSubscription(u.id, 'pro')}
+                                  className="gap-2"
+                                >
+                                  <span className={cn(
+                                    "w-2 h-2 rounded-full",
+                                    u.subscription === 'pro' ? 'bg-primary' : 'bg-muted'
+                                  )} />
+                                  Pro (100/day)
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => handleChangeSubscription(u.id, 'enterprise')}
+                                  className="gap-2"
+                                >
+                                  <span className={cn(
+                                    "w-2 h-2 rounded-full",
+                                    u.subscription === 'enterprise' ? 'bg-yellow-400' : 'bg-muted'
+                                  )} />
+                                  Enterprise (Unlimited)
+                                </DropdownMenuItem>
+                              </DropdownMenuSubContent>
+                            </DropdownMenuSub>
+
+                            <DropdownMenuItem 
+                              onClick={() => handleResetCredits(u.id)}
+                              className="gap-2"
+                            >
+                              <RefreshCw className="w-4 h-4" />
+                              Reset Credits
+                            </DropdownMenuItem>
+                            
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 
                               onClick={() => handleDeleteUser(u.id, u.username)}
@@ -303,6 +369,16 @@ export default function AdminPanel() {
                 onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
               />
             </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-mono text-muted-foreground uppercase">Password</label>
+              <CyberInput
+                type="password"
+                placeholder="Enter password..."
+                value={newUser.password}
+                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+              />
+            </div>
             
             <div className="space-y-2">
               <label className="text-xs font-mono text-muted-foreground uppercase">Role</label>
@@ -330,10 +406,8 @@ export default function AdminPanel() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border">
-                  <SelectItem value="free">Free</SelectItem>
-                  <SelectItem value="basic">Basic</SelectItem>
-                  <SelectItem value="pro">Pro</SelectItem>
-                  <SelectItem value="enterprise">Enterprise</SelectItem>
+                  <SelectItem value="pro">Pro (100 credits/day)</SelectItem>
+                  <SelectItem value="enterprise">Enterprise (Unlimited)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { User, SubscriptionTier } from '@/types';
+import { User, SubscriptionTier, SUBSCRIPTION_LIMITS } from '@/types';
 import { mockUsers } from '@/data/mockData';
 
 interface UserManagementContextType {
@@ -8,6 +8,8 @@ interface UserManagementContextType {
   updateUser: (id: string, updates: Partial<User>) => void;
   deleteUser: (id: string) => void;
   toggleUserStatus: (id: string) => void;
+  updateUserSubscription: (id: string, tier: SubscriptionTier) => void;
+  resetUserCredits: (id: string) => void;
 }
 
 const UserManagementContext = createContext<UserManagementContextType | undefined>(undefined);
@@ -47,8 +49,34 @@ export function UserManagementProvider({ children }: { children: ReactNode }) {
     ));
   }, [users]);
 
+  const updateUserSubscription = useCallback((id: string, tier: SubscriptionTier) => {
+    const limits = SUBSCRIPTION_LIMITS[tier];
+    saveUsers(users.map(user => 
+      user.id === id ? { 
+        ...user, 
+        subscription: tier,
+        dailyCreditsLimit: limits.dailyCredits,
+        dailyCreditsUsed: 0
+      } : user
+    ));
+  }, [users]);
+
+  const resetUserCredits = useCallback((id: string) => {
+    saveUsers(users.map(user => 
+      user.id === id ? { ...user, dailyCreditsUsed: 0 } : user
+    ));
+  }, [users]);
+
   return (
-    <UserManagementContext.Provider value={{ users, addUser, updateUser, deleteUser, toggleUserStatus }}>
+    <UserManagementContext.Provider value={{ 
+      users, 
+      addUser, 
+      updateUser, 
+      deleteUser, 
+      toggleUserStatus,
+      updateUserSubscription,
+      resetUserCredits
+    }}>
       {children}
     </UserManagementContext.Provider>
   );

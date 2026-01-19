@@ -3,10 +3,9 @@ import {
   CreditCard, 
   Check, 
   Crown, 
-  Zap, 
-  Shield, 
-  Star,
-  ArrowUpRight
+  Shield,
+  Zap,
+  Mail
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { CyberCard, CyberCardContent, CyberCardHeader, CyberCardTitle } from '@/components/ui/cyber-card';
@@ -18,116 +17,98 @@ import { cn } from '@/lib/utils';
 interface Plan {
   tier: SubscriptionTier;
   name: string;
-  price: string;
+  credits: string;
   description: string;
   features: string[];
   icon: React.ElementType;
-  popular?: boolean;
 }
 
 const plans: Plan[] = [
   {
-    tier: 'free',
-    name: 'Free',
-    price: '$0',
-    description: 'Basic access for light usage',
-    features: [
-      '100 searches per month',
-      'Basic modules only',
-      'Email support',
-      'Community access',
-    ],
-    icon: Star,
-  },
-  {
-    tier: 'basic',
-    name: 'Basic',
-    price: '$29',
-    description: 'Essential tools for individuals',
-    features: [
-      '1,000 searches per month',
-      'Basic + Social modules',
-      'Email & chat support',
-      'API access (limited)',
-      'Search history',
-    ],
-    icon: Zap,
-  },
-  {
     tier: 'pro',
     name: 'Pro',
-    price: '$99',
-    description: 'Advanced features for professionals',
+    credits: '100/day',
+    description: 'For professionals and researchers',
     features: [
-      '5,000 searches per month',
-      'All Pro modules',
-      'Priority support',
-      'Full API access',
-      'Batch operations',
-      'Export capabilities',
-      'Custom alerts',
+      '100 credits per day',
+      'Access to all Pro modules',
+      'Standard support',
+      'Search history',
+      'Export results',
     ],
     icon: Shield,
-    popular: true,
   },
   {
     tier: 'enterprise',
     name: 'Enterprise',
-    price: '$299',
-    description: 'Unlimited power for teams',
+    credits: 'Unlimited',
+    description: 'For teams and organizations',
     features: [
-      'Unlimited searches',
+      'Unlimited daily credits',
       'All modules unlocked',
-      'Dedicated support',
-      'Unlimited API access',
-      'Team management',
+      'Priority support',
+      'Advanced modules (IntelX, NPD, etc.)',
+      'Bulk operations',
       'Custom integrations',
-      'SLA guarantee',
-      'On-premise option',
     ],
     icon: Crown,
   },
 ];
 
-const tierOrder: SubscriptionTier[] = ['free', 'basic', 'pro', 'enterprise'];
-
 export default function Subscriptions() {
   const { user } = useAuth();
-  const currentTierIndex = tierOrder.indexOf(user?.subscription || 'free');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-4xl mx-auto">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center max-w-2xl mx-auto"
+        className="text-center"
       >
-        <h1 className="text-2xl lg:text-3xl font-bold font-mono tracking-wide">
-          <span className="text-primary text-glow">Subscription</span> Plans
+        <h1 className="text-2xl font-bold font-mono tracking-wide">
+          <span className="text-primary">Subscription</span> Plans
         </h1>
-        <p className="text-sm text-muted-foreground font-mono mt-2">
-          Choose the plan that fits your intelligence needs
+        <p className="text-sm text-muted-foreground mt-2">
+          Your plan is managed by an administrator
         </p>
       </motion.div>
 
-      {/* Current Plan */}
+      {/* Current Plan Status */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="max-w-md mx-auto"
       >
         <CyberCard glow>
-          <CyberCardContent className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <CreditCard className="w-5 h-5 text-primary" />
-              <div>
-                <p className="text-xs text-muted-foreground font-mono uppercase">Current Plan</p>
-                <p className="font-mono font-bold text-foreground capitalize">{user?.subscription}</p>
+          <CyberCardContent className="p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-lg bg-primary/10">
+                  <CreditCard className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Current Plan</p>
+                  <p className="text-xl font-mono font-bold text-foreground capitalize">{user?.subscription}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground uppercase">Daily Credits</p>
+                  <p className="font-mono font-bold text-foreground">
+                    {user?.dailyCreditsLimit === -1 ? (
+                      <span className="text-yellow-400">Unlimited</span>
+                    ) : (
+                      <span>
+                        <span className="text-primary">{(user?.dailyCreditsLimit || 0) - (user?.dailyCreditsUsed || 0)}</span>
+                        <span className="text-muted-foreground"> / {user?.dailyCreditsLimit}</span>
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <CyberBadge variant="glow">Active</CyberBadge>
               </div>
             </div>
-            <CyberBadge variant="glow">Active</CyberBadge>
           </CyberCardContent>
         </CyberCard>
       </motion.div>
@@ -137,14 +118,11 @@ export default function Subscriptions() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 max-w-7xl mx-auto"
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
       >
         {plans.map((plan, index) => {
           const Icon = plan.icon;
           const isCurrentPlan = user?.subscription === plan.tier;
-          const tierIndex = tierOrder.indexOf(plan.tier);
-          const canUpgrade = tierIndex > currentTierIndex;
-          const canDowngrade = tierIndex < currentTierIndex;
           
           return (
             <motion.div
@@ -154,35 +132,41 @@ export default function Subscriptions() {
               transition={{ delay: 0.1 * index }}
             >
               <CyberCard 
-                glow={plan.popular}
                 className={cn(
                   "relative h-full flex flex-col",
-                  plan.popular && "border-primary/50",
-                  isCurrentPlan && "ring-2 ring-primary"
+                  isCurrentPlan && "border-primary/50 ring-1 ring-primary/20"
                 )}
               >
-                {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <CyberBadge variant="glow">Most Popular</CyberBadge>
+                {isCurrentPlan && (
+                  <div className="absolute -top-3 left-4">
+                    <CyberBadge variant="glow">Current Plan</CyberBadge>
                   </div>
                 )}
                 
-                <CyberCardHeader className="text-center">
-                  <div className={cn(
-                    "w-12 h-12 rounded-lg mx-auto flex items-center justify-center mb-2",
-                    plan.popular ? "bg-primary/20" : "bg-muted/50"
-                  )}>
-                    <Icon className={cn(
-                      "w-6 h-6",
-                      plan.popular ? "text-primary" : "text-muted-foreground"
+                <CyberCardHeader className="pt-6">
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "p-2 rounded-lg",
+                      plan.tier === 'enterprise' ? "bg-yellow-500/10" : "bg-primary/10"
+                    )}>
+                      <Icon className={cn(
+                        "w-5 h-5",
+                        plan.tier === 'enterprise' ? "text-yellow-400" : "text-primary"
+                      )} />
+                    </div>
+                    <div>
+                      <CyberCardTitle className="text-lg">{plan.name}</CyberCardTitle>
+                      <p className="text-sm text-muted-foreground">{plan.description}</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-baseline gap-2">
+                    <Zap className={cn(
+                      "w-4 h-4",
+                      plan.tier === 'enterprise' ? "text-yellow-400" : "text-primary"
                     )} />
+                    <span className="text-2xl font-bold font-mono">{plan.credits}</span>
+                    <span className="text-muted-foreground text-sm">credits</span>
                   </div>
-                  <CyberCardTitle className="text-lg">{plan.name}</CyberCardTitle>
-                  <div className="mt-2">
-                    <span className="text-3xl font-bold font-mono text-foreground">{plan.price}</span>
-                    <span className="text-muted-foreground text-sm">/month</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-2">{plan.description}</p>
                 </CyberCardHeader>
 
                 <CyberCardContent className="flex-1">
@@ -201,16 +185,9 @@ export default function Subscriptions() {
                     <CyberButton variant="outline" className="w-full" disabled>
                       Current Plan
                     </CyberButton>
-                  ) : canUpgrade ? (
-                    <CyberButton 
-                      variant={plan.popular ? 'glow' : 'default'} 
-                      className="w-full"
-                    >
-                      Upgrade <ArrowUpRight className="w-4 h-4 ml-1" />
-                    </CyberButton>
                   ) : (
-                    <CyberButton variant="ghost" className="w-full text-muted-foreground">
-                      Downgrade
+                    <CyberButton variant="outline" className="w-full" disabled>
+                      Contact Admin
                     </CyberButton>
                   )}
                 </div>
@@ -220,36 +197,23 @@ export default function Subscriptions() {
         })}
       </motion.div>
 
-      {/* FAQ */}
+      {/* Contact Admin */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-        className="max-w-2xl mx-auto mt-12"
+        transition={{ delay: 0.4 }}
       >
         <CyberCard>
-          <CyberCardHeader>
-            <CyberCardTitle>Frequently Asked Questions</CyberCardTitle>
-          </CyberCardHeader>
-          <CyberCardContent className="space-y-4">
-            <div>
-              <h4 className="font-mono text-foreground font-semibold">Can I change plans anytime?</h4>
-              <p className="text-sm text-muted-foreground mt-1">
-                Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-mono text-foreground font-semibold">What payment methods do you accept?</h4>
-              <p className="text-sm text-muted-foreground mt-1">
-                We accept all major credit cards, PayPal, and cryptocurrency payments.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-mono text-foreground font-semibold">Is there a refund policy?</h4>
-              <p className="text-sm text-muted-foreground mt-1">
-                We offer a 14-day money-back guarantee for all paid plans.
-              </p>
-            </div>
+          <CyberCardContent className="p-6 text-center">
+            <Mail className="w-8 h-8 text-primary mx-auto mb-3" />
+            <h3 className="font-mono font-semibold text-foreground mb-2">Need to upgrade?</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Contact your administrator to change your subscription plan.
+            </p>
+            <CyberButton variant="outline">
+              <Mail className="w-4 h-4 mr-2" />
+              Contact Support
+            </CyberButton>
           </CyberCardContent>
         </CyberCard>
       </motion.div>
