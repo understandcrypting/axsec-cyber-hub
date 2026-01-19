@@ -1,28 +1,19 @@
 import { motion } from 'framer-motion';
 import { 
   User, 
-  Bell, 
   Shield, 
   Key
 } from 'lucide-react';
-import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { CyberCard, CyberCardContent, CyberCardHeader, CyberCardTitle } from '@/components/ui/cyber-card';
 import { CyberInput } from '@/components/ui/cyber-input';
 import { CyberButton } from '@/components/ui/cyber-button';
 import { CyberBadge } from '@/components/ui/cyber-badge';
-import { Switch } from '@/components/ui/switch';
 import { tierBadgeStyles } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 
 export default function Settings() {
   const { user } = useAuth();
-  const [notifications, setNotifications] = useState({
-    email: true,
-    browser: false,
-    searchAlerts: true,
-    weeklyReport: true,
-  });
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
@@ -88,72 +79,11 @@ export default function Settings() {
           </CyberCard>
         </motion.div>
 
-        {/* Notifications */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <CyberCard>
-            <CyberCardHeader>
-              <CyberCardTitle className="flex items-center gap-2">
-                <Bell className="w-5 h-5 text-primary" />
-                Notifications
-              </CyberCardTitle>
-            </CyberCardHeader>
-            <CyberCardContent className="space-y-4">
-              <div className="flex items-center justify-between py-2">
-                <div>
-                  <p className="font-mono text-sm text-foreground">Email Notifications</p>
-                  <p className="text-xs text-muted-foreground">Receive updates via email</p>
-                </div>
-                <Switch 
-                  checked={notifications.email}
-                  onCheckedChange={(checked) => setNotifications(n => ({ ...n, email: checked }))}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between py-2">
-                <div>
-                  <p className="font-mono text-sm text-foreground">Browser Notifications</p>
-                  <p className="text-xs text-muted-foreground">Desktop push notifications</p>
-                </div>
-                <Switch 
-                  checked={notifications.browser}
-                  onCheckedChange={(checked) => setNotifications(n => ({ ...n, browser: checked }))}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between py-2">
-                <div>
-                  <p className="font-mono text-sm text-foreground">Search Alerts</p>
-                  <p className="text-xs text-muted-foreground">Notify on matching queries</p>
-                </div>
-                <Switch 
-                  checked={notifications.searchAlerts}
-                  onCheckedChange={(checked) => setNotifications(n => ({ ...n, searchAlerts: checked }))}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between py-2">
-                <div>
-                  <p className="font-mono text-sm text-foreground">Weekly Report</p>
-                  <p className="text-xs text-muted-foreground">Summary of your activity</p>
-                </div>
-                <Switch 
-                  checked={notifications.weeklyReport}
-                  onCheckedChange={(checked) => setNotifications(n => ({ ...n, weeklyReport: checked }))}
-                />
-              </div>
-            </CyberCardContent>
-          </CyberCard>
-        </motion.div>
-
         {/* Security */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.2 }}
         >
           <CyberCard>
             <CyberCardHeader>
