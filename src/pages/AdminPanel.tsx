@@ -8,9 +8,11 @@ import {
   Power,
   UserPlus,
   Check,
-  Edit2,
   CreditCard,
-  RefreshCw
+  RefreshCw,
+  History,
+  X,
+  Clock
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserManagement } from '@/contexts/UserManagementContext';
@@ -19,7 +21,7 @@ import { CyberInput } from '@/components/ui/cyber-input';
 import { CyberButton } from '@/components/ui/cyber-button';
 import { CyberBadge } from '@/components/ui/cyber-badge';
 import { tierBadgeStyles } from '@/data/mockData';
-import { SubscriptionTier, SUBSCRIPTION_LIMITS } from '@/types';
+import { SubscriptionTier, SUBSCRIPTION_LIMITS, User } from '@/types';
 import { cn } from '@/lib/utils';
 import { Navigate } from 'react-router-dom';
 import {
@@ -48,12 +50,24 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 
+// Mock user logs data
+const generateMockLogs = (userId: string) => [
+  { id: '1', action: 'search', module: 'Discord', query: 'user123456', timestamp: '2025-01-19T15:30:00Z', status: 'success' },
+  { id: '2', action: 'search', module: 'LeakOSINT', query: 'test@email.com', timestamp: '2025-01-19T14:22:00Z', status: 'success' },
+  { id: '3', action: 'search', module: 'Shodan', query: '192.168.1.1', timestamp: '2025-01-19T12:10:00Z', status: 'not_found' },
+  { id: '4', action: 'login', module: '-', query: '-', timestamp: '2025-01-19T10:00:00Z', status: 'success' },
+  { id: '5', action: 'search', module: 'Instagram', query: 'johndoe', timestamp: '2025-01-18T18:45:00Z', status: 'success' },
+  { id: '6', action: 'search', module: 'Snusbase', query: 'user@domain.com', timestamp: '2025-01-18T16:30:00Z', status: 'success' },
+  { id: '7', action: 'login', module: '-', query: '-', timestamp: '2025-01-18T09:00:00Z', status: 'success' },
+  { id: '8', action: 'search', module: 'Roblox', query: 'player123', timestamp: '2025-01-17T20:15:00Z', status: 'success' },
+];
+
 export default function AdminPanel() {
   const { user } = useAuth();
   const { users, addUser, deleteUser, toggleUserStatus, updateUserSubscription, resetUserCredits } = useUserManagement();
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<string | null>(null);
+  const [viewingLogsUser, setViewingLogsUser] = useState<User | null>(null);
   const [newUser, setNewUser] = useState({
     username: '',
     email: '',
@@ -121,6 +135,8 @@ export default function AdminPanel() {
     resetUserCredits(userId);
     toast.success('Daily credits reset');
   };
+
+  const userLogs = viewingLogsUser ? generateMockLogs(viewingLogsUser.id) : [];
 
   return (
     <div className="space-y-6">
@@ -268,6 +284,16 @@ export default function AdminPanel() {
                             </CyberButton>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="bg-popover border-border w-48">
+                            <DropdownMenuItem 
+                              onClick={() => setViewingLogsUser(u)}
+                              className="gap-2"
+                            >
+                              <History className="w-4 h-4" />
+                              View Logs
+                            </DropdownMenuItem>
+                            
+                            <DropdownMenuSeparator />
+                            
                             <DropdownMenuItem 
                               onClick={() => handleToggleStatus(u.id, u.isActive)}
                               className="gap-2"
@@ -420,6 +446,95 @@ export default function AdminPanel() {
             <CyberButton onClick={handleAddUser}>
               <Check className="w-4 h-4" />
               Create User
+            </CyberButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* User Logs Modal */}
+      <Dialog open={!!viewingLogsUser} onOpenChange={(open) => !open && setViewingLogsUser(null)}>
+        <DialogContent className="bg-card border-border sm:max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="font-mono text-lg flex items-center gap-2">
+              <History className="w-5 h-5 text-primary" />
+              Activity Logs - {viewingLogsUser?.username}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4">
+            {/* User Summary */}
+            <div className="flex items-center gap-4 p-4 rounded-lg bg-muted/20 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <span className="font-mono font-bold text-primary">
+                  {viewingLogsUser?.username[0].toUpperCase()}
+                </span>
+              </div>
+              <div className="flex-1">
+                <p className="font-mono text-foreground">{viewingLogsUser?.email}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <CyberBadge className={tierBadgeStyles[viewingLogsUser?.subscription || 'pro']} >
+                    {viewingLogsUser?.subscription}
+                  </CyberBadge>
+                  <span className="text-xs text-muted-foreground">
+                    {viewingLogsUser?.dailyCreditsLimit === -1 
+                      ? 'Unlimited credits' 
+                      : `${viewingLogsUser?.dailyCreditsUsed} / ${viewingLogsUser?.dailyCreditsLimit} credits used`
+                    }
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Logs Table */}
+            <div className="overflow-y-auto max-h-[400px] rounded-lg border border-border/50">
+              <table className="w-full">
+                <thead className="sticky top-0 bg-card">
+                  <tr className="border-b border-border/50">
+                    <th className="text-left py-2 px-3 text-xs font-mono text-muted-foreground uppercase">Time</th>
+                    <th className="text-left py-2 px-3 text-xs font-mono text-muted-foreground uppercase">Action</th>
+                    <th className="text-left py-2 px-3 text-xs font-mono text-muted-foreground uppercase">Module</th>
+                    <th className="text-left py-2 px-3 text-xs font-mono text-muted-foreground uppercase">Query</th>
+                    <th className="text-left py-2 px-3 text-xs font-mono text-muted-foreground uppercase">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {userLogs.map((log) => (
+                    <tr key={log.id} className="border-b border-border/30 hover:bg-muted/10">
+                      <td className="py-2 px-3 text-xs text-muted-foreground font-mono">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {new Date(log.timestamp).toLocaleString()}
+                        </div>
+                      </td>
+                      <td className="py-2 px-3">
+                        <CyberBadge variant={log.action === 'login' ? 'secondary' : 'default'} className="text-[10px]">
+                          {log.action}
+                        </CyberBadge>
+                      </td>
+                      <td className="py-2 px-3 text-sm font-mono text-foreground">
+                        {log.module}
+                      </td>
+                      <td className="py-2 px-3 text-sm font-mono text-muted-foreground truncate max-w-[150px]">
+                        {log.query}
+                      </td>
+                      <td className="py-2 px-3">
+                        <CyberBadge 
+                          variant={log.status === 'success' ? 'success' : 'warning'} 
+                          className="text-[10px]"
+                        >
+                          {log.status}
+                        </CyberBadge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <CyberButton variant="outline" onClick={() => setViewingLogsUser(null)}>
+              Close
             </CyberButton>
           </DialogFooter>
         </DialogContent>
