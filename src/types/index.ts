@@ -7,9 +7,21 @@ export interface User {
   createdAt: string;
   lastLogin: string;
   isActive: boolean;
+  dailyCreditsUsed: number;
+  dailyCreditsLimit: number;
 }
 
-export type SubscriptionTier = 'free' | 'basic' | 'pro' | 'enterprise';
+export type SubscriptionTier = 'pro' | 'enterprise';
+
+export interface SubscriptionLimits {
+  dailyCredits: number;
+  displayCredits: string;
+}
+
+export const SUBSCRIPTION_LIMITS: Record<SubscriptionTier, SubscriptionLimits> = {
+  pro: { dailyCredits: 100, displayCredits: '100/day' },
+  enterprise: { dailyCredits: -1, displayCredits: 'Unlimited' },
+};
 
 export interface Module {
   id: string;

@@ -2,26 +2,20 @@ import { motion } from 'framer-motion';
 import { 
   Activity, 
   Search, 
-  Users, 
   Shield, 
   TrendingUp,
   Clock,
   AlertTriangle,
   CheckCircle,
-  ArrowUpRight
+  ArrowUpRight,
+  Zap
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { CyberCard, CyberCardHeader, CyberCardTitle, CyberCardContent } from '@/components/ui/cyber-card';
 import { CyberBadge } from '@/components/ui/cyber-badge';
 import { CyberButton } from '@/components/ui/cyber-button';
 import { useNavigate } from 'react-router-dom';
-
-const stats = [
-  { label: 'Total Searches', value: '12,847', icon: Search, change: '+12.5%', trend: 'up' },
-  { label: 'Active Modules', value: '24', icon: Activity, change: '+3', trend: 'up' },
-  { label: 'API Requests Today', value: '1,234', icon: TrendingUp, change: '+8.2%', trend: 'up' },
-  { label: 'System Status', value: 'Online', icon: Shield, change: 'Operational', trend: 'stable' },
-];
+import { cn } from '@/lib/utils';
 
 const recentSearches = [
   { query: 'discord:123456789012345678', module: 'Discord', status: 'success', time: '2 min ago' },
@@ -32,14 +26,49 @@ const recentSearches = [
 ];
 
 const systemAlerts = [
-  { type: 'info', message: 'API rate limit at 65% capacity', time: '1 hour ago' },
-  { type: 'warning', message: 'Snusbase experiencing delays', time: '2 hours ago' },
-  { type: 'success', message: 'New module: Telegram lookup available', time: '1 day ago' },
+  { type: 'info', message: 'Daily credits reset at midnight UTC', time: '1 hour ago' },
+  { type: 'warning', message: 'Snusbase module experiencing delays', time: '2 hours ago' },
+  { type: 'success', message: 'New module: IntelX available for Enterprise', time: '1 day ago' },
 ];
 
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  const creditsRemaining = user?.dailyCreditsLimit === -1 
+    ? null 
+    : (user?.dailyCreditsLimit || 0) - (user?.dailyCreditsUsed || 0);
+
+  const stats = [
+    { 
+      label: 'Total Searches', 
+      value: '1,284', 
+      icon: Search, 
+      change: '+12%', 
+      trend: 'up' 
+    },
+    { 
+      label: 'Credits Today', 
+      value: creditsRemaining === null ? '∞' : `${creditsRemaining}`, 
+      icon: Zap, 
+      change: user?.dailyCreditsLimit === -1 ? 'Unlimited' : `of ${user?.dailyCreditsLimit}`, 
+      trend: 'stable' 
+    },
+    { 
+      label: 'Active Modules', 
+      value: '24', 
+      icon: Activity, 
+      change: 'Available', 
+      trend: 'stable' 
+    },
+    { 
+      label: 'System Status', 
+      value: 'Online', 
+      icon: Shield, 
+      change: 'Operational', 
+      trend: 'stable' 
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -50,52 +79,48 @@ export default function Dashboard() {
         className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
       >
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold font-mono tracking-wide">
-            <span className="text-muted-foreground">Welcome back,</span>{' '}
-            <span className="text-primary text-glow">{user?.username}</span>
+          <h1 className="text-2xl font-bold font-mono tracking-wide">
+            Welcome, <span className="text-primary">{user?.username}</span>
           </h1>
-          <p className="text-sm text-muted-foreground font-mono mt-1">
-            <Clock className="inline w-3 h-3 mr-1" />
+          <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
+            <Clock className="w-3 h-3" />
             Last login: {user?.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'N/A'}
           </p>
         </div>
         <CyberButton onClick={() => navigate('/modules')}>
           <Search className="w-4 h-4" />
-          Start New Search
+          New Search
         </CyberButton>
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, index) => (
           <motion.div
             key={stat.label}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
+            transition={{ delay: index * 0.05 }}
           >
             <CyberCard>
               <CyberCardContent className="p-4">
                 <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
+                  <div className="flex-1">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">
                       {stat.label}
                     </p>
                     <p className="text-2xl font-bold font-mono mt-1 text-foreground">
                       {stat.value}
                     </p>
-                    <div className="flex items-center gap-1 mt-1">
-                      {stat.trend === 'up' && (
-                        <TrendingUp className="w-3 h-3 text-success" />
-                      )}
-                      <span className={`text-xs font-mono ${
-                        stat.trend === 'up' ? 'text-success' : 'text-muted-foreground'
-                      }`}>
-                        {stat.change}
-                      </span>
-                    </div>
+                    <p className={cn(
+                      "text-xs font-mono mt-1",
+                      stat.trend === 'up' ? 'text-success' : 'text-muted-foreground'
+                    )}>
+                      {stat.trend === 'up' && <TrendingUp className="w-3 h-3 inline mr-1" />}
+                      {stat.change}
+                    </p>
                   </div>
-                  <div className="p-2 rounded-md bg-primary/10">
+                  <div className="p-2 rounded-lg bg-primary/10">
                     <stat.icon className="w-5 h-5 text-primary" />
                   </div>
                 </div>
@@ -111,7 +136,7 @@ export default function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.2 }}
           className="lg:col-span-2"
         >
           <CyberCard>
@@ -122,16 +147,17 @@ export default function Dashboard() {
               </CyberButton>
             </CyberCardHeader>
             <CyberCardContent>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {recentSearches.map((search, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-3 rounded-md bg-muted/30 hover:bg-muted/50 transition-colors"
+                    className="flex items-center justify-between p-3 rounded-lg bg-muted/20 hover:bg-muted/30 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-2 h-2 rounded-full ${
-                        search.status === 'success' ? 'status-online' : 'status-pending'
-                      }`} />
+                      <div className={cn(
+                        "w-2 h-2 rounded-full",
+                        search.status === 'success' ? 'bg-success' : 'bg-warning'
+                      )} />
                       <div>
                         <code className="text-sm font-mono text-foreground">{search.query}</code>
                         <p className="text-xs text-muted-foreground">{search.module}</p>
@@ -157,7 +183,8 @@ export default function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.3 }}
+          className="space-y-4"
         >
           <CyberCard>
             <CyberCardHeader>
@@ -168,7 +195,7 @@ export default function Dashboard() {
                 {systemAlerts.map((alert, index) => (
                   <div
                     key={index}
-                    className="flex items-start gap-3 p-3 rounded-md bg-muted/30"
+                    className="flex items-start gap-3 p-3 rounded-lg bg-muted/20"
                   >
                     {alert.type === 'warning' && (
                       <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" />
@@ -179,7 +206,7 @@ export default function Dashboard() {
                     {alert.type === 'info' && (
                       <Activity className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                     )}
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm text-foreground">{alert.message}</p>
                       <p className="text-xs text-muted-foreground mt-1">{alert.time}</p>
                     </div>
@@ -190,18 +217,28 @@ export default function Dashboard() {
           </CyberCard>
 
           {/* Quick Actions */}
-          <CyberCard className="mt-4">
+          <CyberCard>
             <CyberCardHeader>
               <CyberCardTitle>Quick Actions</CyberCardTitle>
             </CyberCardHeader>
             <CyberCardContent className="space-y-2">
-              <CyberButton variant="outline" className="w-full justify-start" size="sm">
-                <Users className="w-4 h-4 mr-2" />
-                Batch Lookup
+              <CyberButton 
+                variant="outline" 
+                className="w-full justify-start" 
+                size="sm"
+                onClick={() => navigate('/modules')}
+              >
+                <Search className="w-4 h-4 mr-2" />
+                Browse Modules
               </CyberButton>
-              <CyberButton variant="outline" className="w-full justify-start" size="sm">
+              <CyberButton 
+                variant="outline" 
+                className="w-full justify-start" 
+                size="sm"
+                onClick={() => navigate('/subscriptions')}
+              >
                 <Shield className="w-4 h-4 mr-2" />
-                Generate API Token
+                View Subscription
               </CyberButton>
             </CyberCardContent>
           </CyberCard>

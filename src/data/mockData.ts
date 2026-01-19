@@ -10,6 +10,8 @@ export const mockUsers: User[] = [
     createdAt: '2024-01-15',
     lastLogin: '2025-01-19T10:30:00Z',
     isActive: true,
+    dailyCreditsUsed: 0,
+    dailyCreditsLimit: -1,
   },
   {
     id: '2',
@@ -20,26 +22,32 @@ export const mockUsers: User[] = [
     createdAt: '2024-03-20',
     lastLogin: '2025-01-18T14:20:00Z',
     isActive: true,
+    dailyCreditsUsed: 45,
+    dailyCreditsLimit: 100,
   },
   {
     id: '3',
     username: 'recon_team',
     email: 'recon@axsec.io',
     role: 'user',
-    subscription: 'basic',
+    subscription: 'pro',
     createdAt: '2024-06-10',
     lastLogin: '2025-01-17T09:15:00Z',
     isActive: true,
+    dailyCreditsUsed: 78,
+    dailyCreditsLimit: 100,
   },
   {
     id: '4',
     username: 'intel_ops',
     email: 'intel@axsec.io',
     role: 'user',
-    subscription: 'free',
+    subscription: 'pro',
     createdAt: '2024-09-01',
     lastLogin: '2025-01-10T16:45:00Z',
     isActive: false,
+    dailyCreditsUsed: 0,
+    dailyCreditsLimit: 100,
   },
 ];
 
@@ -48,7 +56,7 @@ export const mockModules: Module[] = [
   {
     id: 'discord',
     name: 'Discord',
-    description: 'Lookup Discord users, servers, and ID-to-IP intelligence',
+    description: 'Lookup Discord users, servers, and ID intelligence',
     icon: 'MessageCircle',
     category: 'social',
     searchTypes: [
@@ -57,7 +65,7 @@ export const mockModules: Module[] = [
       { id: 'server', label: 'Server ID', placeholder: 'Enter Server ID...', icon: 'Server' },
     ],
     isActive: true,
-    requiredTier: 'basic',
+    requiredTier: 'pro',
   },
   {
     id: 'instagram',
@@ -69,7 +77,7 @@ export const mockModules: Module[] = [
       { id: 'username', label: 'Username', placeholder: 'Enter Instagram username...', icon: 'User' },
     ],
     isActive: true,
-    requiredTier: 'basic',
+    requiredTier: 'pro',
   },
   {
     id: 'tiktok',
@@ -81,7 +89,7 @@ export const mockModules: Module[] = [
       { id: 'username', label: 'Username', placeholder: 'Enter TikTok username...', icon: 'User' },
     ],
     isActive: true,
-    requiredTier: 'basic',
+    requiredTier: 'pro',
   },
   {
     id: 'twitter',
@@ -117,7 +125,7 @@ export const mockModules: Module[] = [
       { id: 'username', label: 'Username', placeholder: 'Enter Reddit username...', icon: 'User' },
     ],
     isActive: true,
-    requiredTier: 'basic',
+    requiredTier: 'pro',
   },
   {
     id: 'snapchat',
@@ -144,7 +152,7 @@ export const mockModules: Module[] = [
       { id: 'phone', label: 'Phone', placeholder: 'Enter phone number...', icon: 'Phone' },
     ],
     isActive: true,
-    requiredTier: 'basic',
+    requiredTier: 'pro',
   },
   {
     id: 'snusbase',
@@ -224,7 +232,7 @@ export const mockModules: Module[] = [
       { id: 'ip', label: 'IP Address', placeholder: 'Enter IP address...', icon: 'Globe' },
     ],
     isActive: true,
-    requiredTier: 'free',
+    requiredTier: 'pro',
   },
   {
     id: 'domain',
@@ -236,7 +244,7 @@ export const mockModules: Module[] = [
       { id: 'domain', label: 'Domain', placeholder: 'Enter domain name...', icon: 'Link' },
     ],
     isActive: true,
-    requiredTier: 'free',
+    requiredTier: 'pro',
   },
   // Gaming
   {
@@ -251,7 +259,7 @@ export const mockModules: Module[] = [
       { id: 'group', label: 'Group ID', placeholder: 'Enter Group ID...', icon: 'Users' },
     ],
     isActive: true,
-    requiredTier: 'basic',
+    requiredTier: 'pro',
   },
   {
     id: 'minecraft',
@@ -264,7 +272,7 @@ export const mockModules: Module[] = [
       { id: 'uuid', label: 'UUID', placeholder: 'Enter Minecraft UUID...', icon: 'Hash' },
     ],
     isActive: true,
-    requiredTier: 'basic',
+    requiredTier: 'pro',
   },
   {
     id: 'steam',
@@ -316,7 +324,22 @@ export const mockModules: Module[] = [
       { id: 'username', label: 'Username', placeholder: 'Enter username...', icon: 'User' },
     ],
     isActive: true,
-    requiredTier: 'basic',
+    requiredTier: 'pro',
+  },
+  {
+    id: 'intelx',
+    name: 'IntelX',
+    description: 'Intelligence X search engine for darknet and leaks',
+    icon: 'ShieldAlert',
+    category: 'identity',
+    searchTypes: [
+      { id: 'email', label: 'Email', placeholder: 'Enter email address...', icon: 'Mail' },
+      { id: 'domain', label: 'Domain', placeholder: 'Enter domain...', icon: 'Globe' },
+      { id: 'bitcoin', label: 'Bitcoin', placeholder: 'Enter BTC address...', icon: 'Coins' },
+      { id: 'phone', label: 'Phone', placeholder: 'Enter phone number...', icon: 'Phone' },
+    ],
+    isActive: true,
+    requiredTier: 'enterprise',
   },
   {
     id: 'github',
@@ -328,7 +351,7 @@ export const mockModules: Module[] = [
       { id: 'username', label: 'Username', placeholder: 'Enter GitHub username...', icon: 'User' },
     ],
     isActive: true,
-    requiredTier: 'basic',
+    requiredTier: 'pro',
   },
   {
     id: 'doxbin',
@@ -377,7 +400,7 @@ export const mockSubscriptions: Subscription[] = [
     startDate: '2024-01-15',
     endDate: '2025-01-15',
     isActive: true,
-    features: ['Unlimited searches', 'All modules', 'API access', 'Priority support', 'Bulk operations'],
+    features: ['Unlimited daily credits', 'All modules', 'Priority support', 'Bulk operations'],
   },
   {
     id: 'sub_2',
@@ -386,38 +409,34 @@ export const mockSubscriptions: Subscription[] = [
     startDate: '2024-03-20',
     endDate: '2025-03-20',
     isActive: true,
-    features: ['5000 searches/month', 'Pro modules', 'API access', 'Standard support'],
+    features: ['100 credits per day', 'Pro modules', 'Standard support'],
   },
   {
     id: 'sub_3',
     userId: '3',
-    tier: 'basic',
+    tier: 'pro',
     startDate: '2024-06-10',
     endDate: '2025-06-10',
     isActive: true,
-    features: ['1000 searches/month', 'Basic modules', 'Email support'],
+    features: ['100 credits per day', 'Pro modules', 'Standard support'],
   },
   {
     id: 'sub_4',
     userId: '4',
-    tier: 'free',
+    tier: 'pro',
     startDate: '2024-09-01',
     endDate: '2025-09-01',
     isActive: false,
-    features: ['100 searches/month', 'Free modules only'],
+    features: ['100 credits per day', 'Pro modules', 'Standard support'],
   },
 ];
 
 export const tierColors: Record<string, string> = {
-  free: 'text-muted-foreground',
-  basic: 'text-blue-400',
   pro: 'text-primary',
   enterprise: 'text-yellow-400',
 };
 
 export const tierBadgeStyles: Record<string, string> = {
-  free: 'bg-muted/50 text-muted-foreground border-muted',
-  basic: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
   pro: 'bg-primary/10 text-primary border-primary/30',
   enterprise: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
 };
