@@ -1,247 +1,190 @@
 import { motion } from 'framer-motion';
 import { 
-  Activity, 
+  Zap, 
+  Crown, 
   Search, 
-  Shield, 
-  TrendingUp,
   Clock,
-  AlertTriangle,
-  CheckCircle,
-  ArrowUpRight,
-  Zap
+  LayoutGrid,
+  Plus
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { CyberCard, CyberCardHeader, CyberCardTitle, CyberCardContent } from '@/components/ui/cyber-card';
-import { CyberBadge } from '@/components/ui/cyber-badge';
-import { CyberButton } from '@/components/ui/cyber-button';
 import { useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-
-const recentSearches = [
-  { query: 'discord:123456789012345678', module: 'Discord', status: 'success', time: '2 min ago' },
-  { query: 'user@example.com', module: 'LeakOSINT', status: 'success', time: '5 min ago' },
-  { query: 'johndoe', module: 'Datahound', status: 'success', time: '12 min ago' },
-  { query: '192.168.1.1', module: 'Shodan', status: 'not_found', time: '18 min ago' },
-  { query: 'target_user', module: 'Instagram', status: 'success', time: '25 min ago' },
-];
-
-const systemAlerts = [
-  { type: 'info', message: 'Daily credits reset at midnight UTC', time: '1 hour ago' },
-  { type: 'warning', message: 'Snusbase module experiencing delays', time: '2 hours ago' },
-  { type: 'success', message: 'New module: IntelX available for Enterprise', time: '1 day ago' },
-];
+import { Button } from '@/components/ui/button';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const creditsRemaining = user?.dailyCreditsLimit === -1 
-    ? null 
-    : (user?.dailyCreditsLimit || 0) - (user?.dailyCreditsUsed || 0);
+  const creditsUsed = user?.dailyCreditsUsed || 0;
+  const creditsLimit = user?.dailyCreditsLimit || 100;
+  const isUnlimited = creditsLimit === -1;
 
-  const stats = [
-    { 
-      label: 'Total Searches', 
-      value: '1,284', 
-      icon: Search, 
-      change: '+12%', 
-      trend: 'up' 
-    },
-    { 
-      label: 'Credits Today', 
-      value: creditsRemaining === null ? '∞' : `${creditsRemaining}`, 
-      icon: Zap, 
-      change: user?.dailyCreditsLimit === -1 ? 'Unlimited' : `of ${user?.dailyCreditsLimit}`, 
-      trend: 'stable' 
-    },
-    { 
-      label: 'Active Modules', 
-      value: '24', 
-      icon: Activity, 
-      change: 'Available', 
-      trend: 'stable' 
-    },
-    { 
-      label: 'System Status', 
-      value: 'Online', 
-      icon: Shield, 
-      change: 'Operational', 
-      trend: 'stable' 
-    },
-  ];
+  // Calculate time until reset (midnight UTC)
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setUTCHours(24, 0, 0, 0);
+  const diff = midnight.getTime() - now.getTime();
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+  const resetTime = `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+  const memberSince = user?.createdAt 
+    ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : '--';
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
-      >
-        <div>
-          <h1 className="text-2xl font-bold font-mono tracking-wide">
-            Welcome, <span className="text-primary">{user?.username}</span>
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
-            <Clock className="w-3 h-3" />
-            Last login: {user?.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'N/A'}
+    <div className="min-h-screen grid-pattern">
+      <div className="max-w-6xl mx-auto p-6 lg:p-8 space-y-8">
+        {/* Welcome Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">
+            Welcome back
           </p>
-        </div>
-        <CyberButton onClick={() => navigate('/modules')}>
-          <Search className="w-4 h-4" />
-          New Search
-        </CyberButton>
-      </motion.div>
+          <h1 className="text-3xl lg:text-4xl font-bold font-mono text-foreground">
+            {user?.username}
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Your account overview and quick access to tools.
+          </p>
+        </motion.div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, index) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-          >
-            <CyberCard>
-              <CyberCardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                      {stat.label}
-                    </p>
-                    <p className="text-2xl font-bold font-mono mt-1 text-foreground">
-                      {stat.value}
-                    </p>
-                    <p className={cn(
-                      "text-xs font-mono mt-1",
-                      stat.trend === 'up' ? 'text-success' : 'text-muted-foreground'
-                    )}>
-                      {stat.trend === 'up' && <TrendingUp className="w-3 h-3 inline mr-1" />}
-                      {stat.change}
-                    </p>
-                  </div>
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <stat.icon className="w-5 h-5 text-primary" />
-                  </div>
+        {/* Stats Cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+        >
+          {/* Credits Today */}
+          <div className="clean-card p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 rounded-md bg-muted">
+                <Zap className="w-4 h-4 text-foreground" />
+              </div>
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                Credits Today
+              </span>
+            </div>
+            <p className="text-3xl font-mono font-bold text-foreground">
+              {isUnlimited ? '∞' : creditsLimit - creditsUsed}
+            </p>
+            <div className="mt-2">
+              <p className="text-xs text-muted-foreground">
+                of {isUnlimited ? 'unlimited' : creditsLimit} limit
+              </p>
+              {!isUnlimited && (
+                <div className="mt-2 h-1 bg-muted rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-primary rounded-full transition-all"
+                    style={{ width: `${((creditsLimit - creditsUsed) / creditsLimit) * 100}%` }}
+                  />
                 </div>
-              </CyberCardContent>
-            </CyberCard>
-          </motion.div>
-        ))}
-      </div>
+              )}
+            </div>
+          </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Searches */}
+          {/* Account Status */}
+          <div className="clean-card p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 rounded-md bg-muted">
+                <Crown className="w-4 h-4 text-foreground" />
+              </div>
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                Account Status
+              </span>
+            </div>
+            <p className="text-2xl font-mono font-bold text-foreground capitalize">
+              {user?.subscription || 'Pro'}
+            </p>
+            <p className="text-xs text-muted-foreground mt-2">
+              Member since {memberSince}
+            </p>
+          </div>
+
+          {/* Total Lookups */}
+          <div className="clean-card p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 rounded-md bg-muted">
+                <Search className="w-4 h-4 text-foreground" />
+              </div>
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                Total Lookups
+              </span>
+            </div>
+            <p className="text-3xl font-mono font-bold text-foreground">
+              {user?.totalSearches || 0}
+            </p>
+            <p className="text-xs text-muted-foreground mt-2">
+              All-time lookup count
+            </p>
+          </div>
+
+          {/* Reset In */}
+          <div className="clean-card p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 rounded-md bg-muted">
+                <Clock className="w-4 h-4 text-foreground" />
+              </div>
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                Reset In
+              </span>
+            </div>
+            <p className="text-3xl font-mono font-bold text-foreground">
+              {resetTime}
+            </p>
+            <p className="text-xs text-muted-foreground mt-2">
+              Usage resets in
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Browse Modules Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="lg:col-span-2"
+          className="clean-card p-6 relative"
         >
-          <CyberCard>
-            <CyberCardHeader className="flex flex-row items-center justify-between">
-              <CyberCardTitle>Recent Searches</CyberCardTitle>
-              <CyberButton variant="ghost" size="sm">
-                View All <ArrowUpRight className="w-3 h-3 ml-1" />
-              </CyberButton>
-            </CyberCardHeader>
-            <CyberCardContent>
-              <div className="space-y-2">
-                {recentSearches.map((search, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/20 hover:bg-muted/30 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "w-2 h-2 rounded-full",
-                        search.status === 'success' ? 'bg-success' : 'bg-warning'
-                      )} />
-                      <div>
-                        <code className="text-sm font-mono text-foreground">{search.query}</code>
-                        <p className="text-xs text-muted-foreground">{search.module}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <CyberBadge 
-                        variant={search.status === 'success' ? 'success' : 'warning'}
-                        className="text-[10px]"
-                      >
-                        {search.status === 'success' ? 'Found' : 'No Data'}
-                      </CyberBadge>
-                      <p className="text-xs text-muted-foreground mt-1">{search.time}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CyberCardContent>
-          </CyberCard>
+          <div className="absolute top-4 right-4 text-muted-foreground/30">
+            <Plus className="w-8 h-8" />
+          </div>
+          <h2 className="text-sm uppercase tracking-widest font-semibold text-foreground mb-2">
+            Browse Modules
+          </h2>
+          <p className="text-muted-foreground text-sm max-w-2xl mb-6">
+            Access our comprehensive collection of OSINT tools, breach databases, and intelligence modules. 
+            Explore various data sources and investigative resources.
+          </p>
+          <Button 
+            variant="outline" 
+            className="font-mono uppercase tracking-wider text-xs"
+            onClick={() => navigate('/modules')}
+          >
+            <LayoutGrid className="w-4 h-4 mr-2" />
+            Browse Modules Now
+          </Button>
         </motion.div>
 
-        {/* System Alerts */}
+        {/* System Status */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="space-y-4"
+          className="clean-card p-5 flex items-center justify-between"
         >
-          <CyberCard>
-            <CyberCardHeader>
-              <CyberCardTitle>System Alerts</CyberCardTitle>
-            </CyberCardHeader>
-            <CyberCardContent>
-              <div className="space-y-3">
-                {systemAlerts.map((alert, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start gap-3 p-3 rounded-lg bg-muted/20"
-                  >
-                    {alert.type === 'warning' && (
-                      <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" />
-                    )}
-                    {alert.type === 'success' && (
-                      <CheckCircle className="w-4 h-4 text-success flex-shrink-0 mt-0.5" />
-                    )}
-                    {alert.type === 'info' && (
-                      <Activity className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-foreground">{alert.message}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{alert.time}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CyberCardContent>
-          </CyberCard>
-
-          {/* Quick Actions */}
-          <CyberCard>
-            <CyberCardHeader>
-              <CyberCardTitle>Quick Actions</CyberCardTitle>
-            </CyberCardHeader>
-            <CyberCardContent className="space-y-2">
-              <CyberButton 
-                variant="outline" 
-                className="w-full justify-start" 
-                size="sm"
-                onClick={() => navigate('/modules')}
-              >
-                <Search className="w-4 h-4 mr-2" />
-                Browse Modules
-              </CyberButton>
-              <CyberButton 
-                variant="outline" 
-                className="w-full justify-start" 
-                size="sm"
-                onClick={() => navigate('/subscriptions')}
-              >
-                <Shield className="w-4 h-4 mr-2" />
-                View Subscription
-              </CyberButton>
-            </CyberCardContent>
-          </CyberCard>
+          <div>
+            <h3 className="font-semibold text-foreground">System status</h3>
+            <p className="text-sm text-muted-foreground">
+              All systems operational. No incidents reported.
+            </p>
+          </div>
+          <span className="status-operational text-xs font-mono uppercase px-3 py-1.5 rounded">
+            Operational
+          </span>
         </motion.div>
       </div>
     </div>

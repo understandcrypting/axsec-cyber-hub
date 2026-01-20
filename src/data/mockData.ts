@@ -12,6 +12,7 @@ export const mockUsers: User[] = [
     isActive: true,
     dailyCreditsUsed: 0,
     dailyCreditsLimit: -1,
+    totalSearches: 1284,
   },
   {
     id: '2',
@@ -24,6 +25,7 @@ export const mockUsers: User[] = [
     isActive: true,
     dailyCreditsUsed: 45,
     dailyCreditsLimit: 100,
+    totalSearches: 523,
   },
   {
     id: '3',
@@ -36,6 +38,7 @@ export const mockUsers: User[] = [
     isActive: true,
     dailyCreditsUsed: 78,
     dailyCreditsLimit: 100,
+    totalSearches: 312,
   },
   {
     id: '4',
@@ -48,6 +51,7 @@ export const mockUsers: User[] = [
     isActive: false,
     dailyCreditsUsed: 0,
     dailyCreditsLimit: 100,
+    totalSearches: 89,
   },
 ];
 

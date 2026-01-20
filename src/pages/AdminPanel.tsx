@@ -101,6 +101,7 @@ export default function AdminPanel() {
       isActive: true,
       dailyCreditsUsed: 0,
       dailyCreditsLimit: limits.dailyCredits,
+      totalSearches: 0,
     });
 
     toast.success('User created successfully');

@@ -1,82 +1,88 @@
 import { motion } from 'framer-motion';
 import { 
-  User, 
   Shield, 
-  Key
+  Key,
+  Monitor,
+  LogOut
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { CyberCard, CyberCardContent, CyberCardHeader, CyberCardTitle } from '@/components/ui/cyber-card';
-import { CyberInput } from '@/components/ui/cyber-input';
-import { CyberButton } from '@/components/ui/cyber-button';
-import { CyberBadge } from '@/components/ui/cyber-badge';
+import { Button } from '@/components/ui/button';
 import { tierBadgeStyles } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 
 export default function Settings() {
   const { user } = useAuth();
 
-  return (
-    <div className="space-y-6 max-w-3xl mx-auto">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <h1 className="text-2xl font-bold font-mono tracking-wide">
-          <span className="text-primary">Settings</span>
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Manage your account preferences
-        </p>
-      </motion.div>
+  const memberSince = user?.createdAt 
+    ? new Date(user.createdAt).toLocaleDateString('en-US', { 
+        day: 'numeric',
+        month: 'short', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    : '--';
 
-      <div className="grid gap-6">
-        {/* Profile Settings */}
+  return (
+    <div className="min-h-screen grid-pattern">
+      <div className="max-w-4xl mx-auto p-6 lg:p-8 space-y-8">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-2">
+            Account Settings
+          </h1>
+          <p className="text-muted-foreground">
+            Manage your profile, sessions, and account preferences
+          </p>
+        </motion.div>
+
+        {/* Account Overview */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
+          className="clean-card p-6"
         >
-          <CyberCard>
-            <CyberCardHeader>
-              <CyberCardTitle className="flex items-center gap-2">
-                <User className="w-5 h-5 text-primary" />
-                Profile
-              </CyberCardTitle>
-            </CyberCardHeader>
-            <CyberCardContent className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-                  <span className="text-xl font-mono font-bold text-primary">
-                    {user?.username[0].toUpperCase()}
-                  </span>
-                </div>
-                <div>
-                  <p className="font-mono font-semibold text-foreground">{user?.username}</p>
-                  <p className="text-sm text-muted-foreground">{user?.email}</p>
-                </div>
-                <CyberBadge className={cn("ml-auto", tierBadgeStyles[user?.subscription || 'pro'])}>
-                  {user?.subscription}
-                </CyberBadge>
-              </div>
+          <h2 className="text-sm uppercase tracking-widest font-semibold text-muted-foreground mb-5">
+            Account Overview
+          </h2>
+          
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="clean-card p-4">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Username</p>
+              <p className="font-mono text-foreground">{user?.username}</p>
+            </div>
+            <div className="clean-card p-4">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Email</p>
+              <p className="font-mono text-foreground text-sm truncate">{user?.email || 'Not set'}</p>
+            </div>
+            <div className="clean-card p-4">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Status</p>
+              <p className={cn("font-mono capitalize", tierBadgeStyles[user?.subscription || 'pro'])}>
+                {user?.subscription}
+              </p>
+            </div>
+            <div className="clean-card p-4">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Member Since</p>
+              <p className="font-mono text-foreground text-sm">{memberSince}</p>
+            </div>
+            <div className="clean-card p-4">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">User ID</p>
+              <p className="font-mono text-foreground text-sm">{user?.id}</p>
+            </div>
+          </div>
 
-              <div className="grid gap-4 pt-4 border-t border-border/30">
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-xs font-mono text-muted-foreground uppercase">Username</label>
-                    <CyberInput defaultValue={user?.username} />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-mono text-muted-foreground uppercase">Email</label>
-                    <CyberInput defaultValue={user?.email} />
-                  </div>
-                </div>
-                <CyberButton variant="outline" className="w-fit">
-                  Save Changes
-                </CyberButton>
-              </div>
-            </CyberCardContent>
-          </CyberCard>
+          <div className="mt-4">
+            <div className="clean-card p-4 w-fit">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Support ID</p>
+              <p className="font-mono text-foreground font-semibold">
+                {user?.id?.slice(0, 6).toUpperCase() || 'AXSEC1'}
+              </p>
+            </div>
+          </div>
         </motion.div>
 
         {/* Security */}
@@ -84,37 +90,74 @@ export default function Settings() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
+          className="clean-card p-6"
         >
-          <CyberCard>
-            <CyberCardHeader>
-              <CyberCardTitle className="flex items-center gap-2">
-                <Shield className="w-5 h-5 text-primary" />
-                Security
-              </CyberCardTitle>
-            </CyberCardHeader>
-            <CyberCardContent className="space-y-4">
-              <CyberButton variant="outline" className="w-full sm:w-auto justify-start">
-                <Key className="w-4 h-4 mr-2" />
-                Change Password
-              </CyberButton>
-              
-              <CyberButton variant="outline" className="w-full sm:w-auto justify-start">
-                <Shield className="w-4 h-4 mr-2" />
-                Enable Two-Factor Auth
-              </CyberButton>
-              
-              <div className="pt-4 border-t border-border/30">
-                <p className="text-xs font-mono text-muted-foreground uppercase mb-3">Active Sessions</p>
-                <div className="p-3 rounded-md bg-muted/20 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-mono text-foreground">Current Session</p>
-                    <p className="text-xs text-muted-foreground">Active now</p>
-                  </div>
-                  <div className="w-2 h-2 rounded-full bg-success" />
-                </div>
+          <h2 className="text-sm uppercase tracking-widest font-semibold text-muted-foreground mb-5">
+            Security
+          </h2>
+          
+          <div className="space-y-3">
+            <Button variant="outline" className="justify-start font-mono text-xs uppercase tracking-wider">
+              <Key className="w-4 h-4 mr-3" />
+              Change Password
+            </Button>
+            
+            <Button variant="outline" className="justify-start font-mono text-xs uppercase tracking-wider">
+              <Shield className="w-4 h-4 mr-3" />
+              Enable Two-Factor Auth
+            </Button>
+          </div>
+        </motion.div>
+
+        {/* Active Sessions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="clean-card p-6"
+        >
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-sm uppercase tracking-widest font-semibold text-muted-foreground">
+              Active Sessions
+            </h2>
+            <Button variant="destructive" size="sm" className="font-mono text-xs uppercase tracking-wider">
+              <LogOut className="w-4 h-4 mr-2" />
+              Revoke All Sessions
+            </Button>
+          </div>
+          
+          <div className="clean-card p-4">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-muted-foreground text-xs uppercase mb-1">Device</p>
+                <p className="text-foreground font-mono">Desktop</p>
               </div>
-            </CyberCardContent>
-          </CyberCard>
+              <div>
+                <p className="text-muted-foreground text-xs uppercase mb-1">Platform</p>
+                <p className="text-foreground font-mono">Web Browser</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground text-xs uppercase mb-1">Browser</p>
+                <p className="text-foreground font-mono">Chrome</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground text-xs uppercase mb-1">Created</p>
+                <p className="text-foreground font-mono text-xs">{memberSince}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-muted-foreground text-xs uppercase mb-1">Expires</p>
+                <p className="text-foreground font-mono text-xs">
+                  {new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </p>
+              </div>
+            </div>
+          </div>
         </motion.div>
       </div>
     </div>

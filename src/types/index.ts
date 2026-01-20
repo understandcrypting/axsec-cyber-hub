@@ -9,6 +9,7 @@ export interface User {
   isActive: boolean;
   dailyCreditsUsed: number;
   dailyCreditsLimit: number;
+  totalSearches: number;
 }
 
 export type SubscriptionTier = 'pro' | 'enterprise';
