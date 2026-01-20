@@ -93,9 +93,9 @@ export default function ModuleSearch() {
   if (!module) {
     return (
       <div className="min-h-screen grid-pattern flex flex-col items-center justify-center">
-        <XCircle className="w-12 h-12 text-destructive mb-4" />
-        <h2 className="text-xl font-mono text-foreground">Module Not Found</h2>
-        <Button variant="outline" onClick={() => navigate('/modules')} className="mt-4">
+        <XCircle className="w-10 h-10 text-muted-foreground mb-4" />
+        <h2 className="text-lg font-medium text-foreground mb-4">Module Not Found</h2>
+        <Button variant="outline" onClick={() => navigate('/modules')}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Modules
         </Button>
@@ -131,7 +131,7 @@ export default function ModuleSearch() {
 
   return (
     <div className="min-h-screen grid-pattern">
-      <div className="max-w-3xl mx-auto p-6 lg:p-8 space-y-8">
+      <div className="max-w-3xl mx-auto p-6 lg:p-8 space-y-6">
         {/* Back Button */}
         <motion.div
           initial={{ opacity: 0, x: -10 }}
@@ -141,9 +141,9 @@ export default function ModuleSearch() {
             variant="outline" 
             size="sm"
             onClick={() => navigate('/modules')}
-            className="font-mono uppercase tracking-wider text-xs"
+            className="font-mono uppercase tracking-widest text-[10px] h-8"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <ArrowLeft className="w-3.5 h-3.5 mr-2" />
             Back to Modules
           </Button>
         </motion.div>
@@ -152,15 +152,15 @@ export default function ModuleSearch() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center"
+          className="text-center py-4"
         >
-          <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
             Advanced OSINT
           </p>
-          <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-3">
+          <h1 className="text-2xl lg:text-3xl font-semibold text-foreground mb-2">
             {module.name}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
             {module.description}
           </p>
         </motion.div>
@@ -170,10 +170,10 @@ export default function ModuleSearch() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="clean-card p-6"
+          className="clean-card"
         >
           {/* Tabs */}
-          <div className="flex gap-6 border-b border-border mb-6">
+          <div className="flex gap-6 px-6 border-b border-border">
             {module.searchTypes.map((type) => (
               <button
                 key={type.id}
@@ -183,7 +183,7 @@ export default function ModuleSearch() {
                   setResults(null);
                 }}
                 className={cn(
-                  "pb-3 text-sm font-medium uppercase tracking-wider transition-colors relative",
+                  "py-4 text-xs font-medium uppercase tracking-widest transition-colors relative",
                   selectedSearchType === type.id 
                     ? "text-foreground" 
                     : "text-muted-foreground hover:text-foreground"
@@ -193,7 +193,7 @@ export default function ModuleSearch() {
                 {selectedSearchType === type.id && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground"
+                    className="absolute bottom-0 left-0 right-0 h-px bg-foreground"
                   />
                 )}
               </button>
@@ -201,27 +201,27 @@ export default function ModuleSearch() {
           </div>
 
           {/* Search Form */}
-          <form onSubmit={handleSearch} className="space-y-4">
+          <form onSubmit={handleSearch} className="p-6 space-y-4">
             <div>
-              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2 block">
+              <label className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground mb-2 block">
                 Query
               </label>
               <Input
                 placeholder={currentSearchType?.placeholder || 'Enter query...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-input border-border h-12 font-mono"
+                className="bg-input border-border h-11 font-mono text-sm"
                 disabled={isSearching}
               />
             </div>
 
             {module.searchTypes.length > 1 && (
               <div>
-                <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2 block">
+                <label className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground mb-2 block">
                   Query Type
                 </label>
                 <Select value={selectedSearchType} onValueChange={setSelectedSearchType}>
-                  <SelectTrigger className="bg-input border-border h-12">
+                  <SelectTrigger className="bg-input border-border h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -238,7 +238,7 @@ export default function ModuleSearch() {
             <Button 
               type="submit" 
               disabled={isSearching || !searchQuery.trim()}
-              className="w-full h-12 font-mono uppercase tracking-wider"
+              className="w-full h-11 font-mono uppercase tracking-widest text-xs"
             >
               {isSearching ? (
                 <>
@@ -265,8 +265,8 @@ export default function ModuleSearch() {
               exit={{ opacity: 0 }}
               className="text-center py-12"
             >
-              <Loader2 className="w-10 h-10 text-muted-foreground animate-spin mx-auto" />
-              <p className="font-mono text-muted-foreground mt-4">
+              <Loader2 className="w-8 h-8 text-muted-foreground animate-spin mx-auto" />
+              <p className="text-sm text-muted-foreground mt-4">
                 Querying databases...
               </p>
             </motion.div>
@@ -280,41 +280,41 @@ export default function ModuleSearch() {
               exit={{ opacity: 0 }}
               className="clean-card overflow-hidden"
             >
-              <div className="p-4 border-b border-border flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+                <div className="flex items-center gap-2">
                   {results.success ? (
-                    <CheckCircle className="w-5 h-5 text-success" />
+                    <CheckCircle className="w-4 h-4 text-success" />
                   ) : (
-                    <XCircle className="w-5 h-5 text-destructive" />
+                    <XCircle className="w-4 h-4 text-destructive" />
                   )}
-                  <span className="font-medium text-foreground">
+                  <span className="font-medium text-foreground text-sm">
                     {results.success ? 'Results Found' : 'No Results'}
                   </span>
                 </div>
-                <span className="text-xs text-muted-foreground font-mono">
+                <span className="text-[10px] text-muted-foreground font-mono uppercase">
                   {results.source} • {new Date(results.timestamp).toLocaleTimeString()}
                 </span>
               </div>
               
-              <div className="p-4">
+              <div className="p-5">
                 {results.success ? (
                   <div className="space-y-4">
                     <div className="relative">
-                      <pre className="p-4 rounded-md bg-muted/30 overflow-x-auto text-sm font-mono text-foreground">
+                      <pre className="p-4 rounded bg-muted/50 overflow-x-auto text-xs font-mono text-foreground">
                         {JSON.stringify(results.data, null, 2)}
                       </pre>
                       <button
                         onClick={() => copyToClipboard(JSON.stringify(results.data, null, 2))}
-                        className="absolute top-2 right-2 p-2 rounded-md bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+                        className="absolute top-2 right-2 p-2 rounded bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
                       >
-                        <Copy className="w-4 h-4" />
+                        <Copy className="w-3.5 h-3.5" />
                       </button>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {Object.entries(results.data).map(([key, value]) => (
-                        <div key={key} className="p-3 rounded-md bg-muted/20 border border-border/50">
-                          <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-1">
+                        <div key={key} className="inner-card p-3">
+                          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-1">
                             {key.replace(/_/g, ' ')}
                           </p>
                           <p className="font-mono text-foreground text-sm break-all">
@@ -326,8 +326,8 @@ export default function ModuleSearch() {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <XCircle className="w-10 h-10 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">
+                    <XCircle className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">
                       No data found for: <code className="text-foreground">{searchQuery}</code>
                     </p>
                   </div>

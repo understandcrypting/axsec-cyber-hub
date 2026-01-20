@@ -13,12 +13,12 @@ import {
   Crown,
   Wifi,
   Gamepad2,
-  Lock
+  Lock,
+  ChevronRight
 } from 'lucide-react';
-import { mockModules, tierBadgeStyles } from '@/data/mockData';
+import { mockModules } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { SubscriptionTier } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -72,50 +72,52 @@ export default function Modules() {
         animate={{ opacity: 1, y: 0 }}
         className={cn(
           "clean-card p-5 cursor-pointer transition-all duration-200 group relative",
-          locked && "opacity-60",
-          isComingSoon && "opacity-50 pointer-events-none"
+          locked && "opacity-50",
+          isComingSoon && "opacity-40 pointer-events-none"
         )}
         onClick={() => !isComingSoon && handleModuleClick(module.id)}
       >
         {isComingSoon && (
-          <span className="absolute top-3 right-3 text-[10px] uppercase tracking-wider text-muted-foreground">
+          <span className="absolute top-3 right-3 text-[9px] uppercase tracking-wider text-muted-foreground">
             Coming Soon
           </span>
         )}
         {locked && !isComingSoon && (
-          <Lock className="absolute top-3 right-3 w-4 h-4 text-muted-foreground" />
+          <Lock className="absolute top-4 right-4 w-3.5 h-3.5 text-muted-foreground" />
         )}
         
-        <div className="p-3 rounded-md bg-muted/50 w-fit mb-4">
-          <Icon className="w-5 h-5 text-foreground" />
+        <div className="w-10 h-10 rounded bg-muted flex items-center justify-center mb-4">
+          <Icon className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
         </div>
         
-        <h3 className="font-semibold text-foreground mb-2 uppercase text-sm tracking-wide">
+        <h3 className="font-medium text-foreground mb-1.5 text-sm uppercase tracking-wide">
           {module.name}
         </h3>
-        <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">
+        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
           {module.description}
         </p>
+
+        <ChevronRight className="absolute bottom-4 right-4 w-4 h-4 text-muted-foreground/0 group-hover:text-muted-foreground transition-all group-hover:translate-x-0.5" />
       </motion.div>
     );
   };
 
   return (
     <div className="min-h-screen grid-pattern">
-      <div className="max-w-6xl mx-auto p-6 lg:p-8 space-y-10">
+      <div className="max-w-6xl mx-auto p-6 lg:p-8 space-y-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center"
         >
-          <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
             Explore Our Tools
           </p>
-          <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-3">
+          <h1 className="text-2xl lg:text-3xl font-semibold text-foreground mb-2">
             Module Library
           </h1>
-          <p className="text-muted-foreground max-w-xl mx-auto">
+          <p className="text-sm text-muted-foreground max-w-lg mx-auto">
             Access our comprehensive collection of OSINT tools, breach databases, and intelligence modules
           </p>
         </motion.div>
@@ -125,13 +127,13 @@ export default function Modules() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="max-w-2xl mx-auto"
+          className="max-w-xl mx-auto"
         >
           <Input
             placeholder="Search modules..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-card border-border h-12 text-sm font-mono"
+            className="bg-card border-border h-11 text-sm font-mono"
           />
         </motion.div>
 
@@ -142,14 +144,21 @@ export default function Modules() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <div className="section-divider mb-6">
-              <span className="text-xs uppercase tracking-widest text-muted-foreground font-semibold px-4">
+            <div className="section-divider mb-5">
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium px-4">
                 Featured & Recommended
               </span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {featuredModules.map((module) => (
-                <ModuleCard key={module.id} module={module} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {featuredModules.map((module, index) => (
+                <motion.div
+                  key={module.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 * index }}
+                >
+                  <ModuleCard module={module} />
+                </motion.div>
               ))}
             </div>
           </motion.div>
@@ -162,14 +171,21 @@ export default function Modules() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-            <div className="section-divider mb-6">
-              <span className="text-xs uppercase tracking-widest text-muted-foreground font-semibold px-4">
+            <div className="section-divider mb-5">
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium px-4">
                 AXSEC Premium Only
               </span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {premiumModules.map((module) => (
-                <ModuleCard key={module.id} module={module} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {premiumModules.map((module, index) => (
+                <motion.div
+                  key={module.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 * index }}
+                >
+                  <ModuleCard module={module} />
+                </motion.div>
               ))}
             </div>
           </motion.div>
@@ -177,8 +193,8 @@ export default function Modules() {
 
         {filteredModules.length === 0 && (
           <div className="text-center py-16">
-            <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground font-mono">No modules found</p>
+            <Search className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground text-sm">No modules found</p>
           </div>
         )}
       </div>
