@@ -5,7 +5,8 @@ import {
   Search, 
   Clock,
   LayoutGrid,
-  Plus
+  Plus,
+  ChevronRight
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -35,19 +36,19 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen grid-pattern">
-      <div className="max-w-6xl mx-auto p-6 lg:p-8 space-y-8">
+      <div className="max-w-6xl mx-auto p-6 lg:p-8 space-y-6">
         {/* Welcome Header */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
             Welcome back
           </p>
-          <h1 className="text-3xl lg:text-4xl font-bold font-mono text-foreground">
+          <h1 className="text-2xl lg:text-3xl font-semibold font-mono text-foreground">
             {user?.username}
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-sm text-muted-foreground mt-1">
             Your account overview and quick access to tools.
           </p>
         </motion.div>
@@ -61,82 +62,72 @@ export default function Dashboard() {
         >
           {/* Credits Today */}
           <div className="clean-card p-5">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-md bg-muted">
-                <Zap className="w-4 h-4 text-foreground" />
-              </div>
-              <span className="text-xs uppercase tracking-wider text-muted-foreground">
+            <div className="flex items-center gap-2 mb-4">
+              <Zap className="w-4 h-4 text-muted-foreground" />
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
                 Credits Today
               </span>
             </div>
-            <p className="text-3xl font-mono font-bold text-foreground">
+            <p className="text-3xl font-mono font-semibold text-foreground mb-1">
               {isUnlimited ? '∞' : creditsLimit - creditsUsed}
             </p>
-            <div className="mt-2">
-              <p className="text-xs text-muted-foreground">
-                of {isUnlimited ? 'unlimited' : creditsLimit} limit
-              </p>
-              {!isUnlimited && (
-                <div className="mt-2 h-1 bg-muted rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-primary rounded-full transition-all"
-                    style={{ width: `${((creditsLimit - creditsUsed) / creditsLimit) * 100}%` }}
-                  />
-                </div>
-              )}
-            </div>
+            <p className="text-xs text-muted-foreground">
+              of {isUnlimited ? 'unlimited' : `${creditsLimit} limit`}
+            </p>
+            {!isUnlimited && (
+              <div className="mt-3 h-1 bg-muted rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-foreground/60 rounded-full transition-all"
+                  style={{ width: `${((creditsLimit - creditsUsed) / creditsLimit) * 100}%` }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Account Status */}
           <div className="clean-card p-5">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-md bg-muted">
-                <Crown className="w-4 h-4 text-foreground" />
-              </div>
-              <span className="text-xs uppercase tracking-wider text-muted-foreground">
+            <div className="flex items-center gap-2 mb-4">
+              <Crown className="w-4 h-4 text-muted-foreground" />
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
                 Account Status
               </span>
             </div>
-            <p className="text-2xl font-mono font-bold text-foreground capitalize">
+            <p className="text-2xl font-mono font-semibold text-foreground capitalize mb-1">
               {user?.subscription || 'Pro'}
             </p>
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="text-xs text-muted-foreground">
               Member since {memberSince}
             </p>
           </div>
 
           {/* Total Lookups */}
           <div className="clean-card p-5">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-md bg-muted">
-                <Search className="w-4 h-4 text-foreground" />
-              </div>
-              <span className="text-xs uppercase tracking-wider text-muted-foreground">
+            <div className="flex items-center gap-2 mb-4">
+              <Search className="w-4 h-4 text-muted-foreground" />
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
                 Total Lookups
               </span>
             </div>
-            <p className="text-3xl font-mono font-bold text-foreground">
+            <p className="text-3xl font-mono font-semibold text-foreground mb-1">
               {user?.totalSearches || 0}
             </p>
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="text-xs text-muted-foreground">
               All-time lookup count
             </p>
           </div>
 
           {/* Reset In */}
           <div className="clean-card p-5">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-md bg-muted">
-                <Clock className="w-4 h-4 text-foreground" />
-              </div>
-              <span className="text-xs uppercase tracking-wider text-muted-foreground">
+            <div className="flex items-center gap-2 mb-4">
+              <Clock className="w-4 h-4 text-muted-foreground" />
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
                 Reset In
               </span>
             </div>
-            <p className="text-3xl font-mono font-bold text-foreground">
+            <p className="text-3xl font-mono font-semibold text-foreground mb-1">
               {resetTime}
             </p>
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="text-xs text-muted-foreground">
               Usage resets in
             </p>
           </div>
@@ -147,25 +138,26 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="clean-card p-6 relative"
+          className="clean-card p-6 relative overflow-hidden"
         >
-          <div className="absolute top-4 right-4 text-muted-foreground/30">
-            <Plus className="w-8 h-8" />
+          <div className="absolute top-4 right-4 text-muted-foreground/20">
+            <Plus className="w-12 h-12" />
           </div>
-          <h2 className="text-sm uppercase tracking-widest font-semibold text-foreground mb-2">
+          <h2 className="text-xs uppercase tracking-widest font-medium text-muted-foreground mb-2">
             Browse Modules
           </h2>
-          <p className="text-muted-foreground text-sm max-w-2xl mb-6">
+          <p className="text-muted-foreground text-sm max-w-2xl mb-5">
             Access our comprehensive collection of OSINT tools, breach databases, and intelligence modules. 
             Explore various data sources and investigative resources.
           </p>
           <Button 
             variant="outline" 
-            className="font-mono uppercase tracking-wider text-xs"
+            className="font-mono uppercase tracking-widest text-xs group"
             onClick={() => navigate('/modules')}
           >
             <LayoutGrid className="w-4 h-4 mr-2" />
             Browse Modules Now
+            <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
           </Button>
         </motion.div>
 
@@ -177,12 +169,12 @@ export default function Dashboard() {
           className="clean-card p-5 flex items-center justify-between"
         >
           <div>
-            <h3 className="font-semibold text-foreground">System status</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="font-medium text-foreground text-sm">System Status</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
               All systems operational. No incidents reported.
             </p>
           </div>
-          <span className="status-operational text-xs font-mono uppercase px-3 py-1.5 rounded">
+          <span className="status-operational uppercase font-mono rounded">
             Operational
           </span>
         </motion.div>
